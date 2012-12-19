@@ -21,7 +21,7 @@ local function multipart_read(parser)
     --if typ == 'header' then
     --    multipart_parse_key(res[1])
     
-    ngx.say("read: ", cjson.encode({typ, res}))
+    ngx.say("read: ", typ, res)
 
     return true
 end
