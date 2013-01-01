@@ -1,3 +1,0 @@
-#!/bin/bash
-
-nginx-openresty -p `pwd`/ -s stop
