@@ -2,3 +2,5 @@
 jsdocs/
 htdocs/
 logs/
+conf/mime.types
+htpasswd
