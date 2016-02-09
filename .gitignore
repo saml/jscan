@@ -1,6 +1,2 @@
-*_temp
-jsdocs/
-htdocs/
-logs/
-conf/mime.types
-htpasswd
+deps/
+jsonbin
