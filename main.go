@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
-	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 var supportedTypes map[string]int = map[string]int{
@@ -26,41 +26,29 @@ func main() {
 	defer s.Close()
 
 	db := s.DB("jsonbin")
-	c := db.C("submissions")
+	coll := db.C("submissions")
 
-	http.HandleFunc("/submissions/", func(w http.ResponseWriter, r *http.Request) {
-		ty := strings.Split(r.URL.Path, "/")[2]
+	r := gin.New()
+	r.GET("/submissions/:ty", func(c *gin.Context) {
+		ty := c.Param("ty")
 		if _, ok := supportedTypes[ty]; !ok {
-			http.Error(w, "Invalid Type", http.StatusBadRequest)
+			c.String(http.StatusNotFound, "Invalid Type")
 			return
 		}
 
-		switch r.Method {
-		case "GET":
-			s, err := findSubmittedData(c, ty, 0, 10)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"a": s,
-			})
-		case "POST":
-			now := time.Now()
-			s := SubmittedData{
-				Type:        ty,
-				CreatedDate: now,
-				UpdateDate:  now,
-			}
-			json.NewEncoder(w).Encode(&s)
-		default:
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		s, err := findSubmittedData(coll, ty, 0, 10)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
+
+		json.NewEncoder(c.Writer).Encode(map[string]interface{}{
+			"a": s,
+		})
 	})
 
 	addr := fmt.Sprintf(":%d", port)
 	log.Printf("Listening to http://localhost:%d", port)
-	log.Fatal(http.ListenAndServe(addr, nil))
+	r.Run(addr)
 
 }

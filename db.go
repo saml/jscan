@@ -25,6 +25,7 @@ func dbConnect(url string) *mgo.Session {
 	if err != nil {
 		log.Fatal(err)
 	}
+	session.SetMode(mgo.Eventual, true)
 	return session
 }
 
